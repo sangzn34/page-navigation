@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Flowchart Preview (Left / Center / Right)</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --card: #121a33;
+        --card2: #0f1730;
+        --text: #e9ecff;
+        --muted: #aeb7e8;
+        --blue: #2f7df6;
+        --line: #24305e;
+        --ok: #25c2a0;
+        --warn: #f7c948;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial,
+          "Noto Sans Thai",
+          sans-serif;
+        background: radial-gradient(
+          1200px 800px at 70% 20%,
+          #1a2b6a 0%,
+          var(--bg) 55%
+        );
+        color: var(--text);
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .wrap {
+        width: min(980px, 100%);
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+      }
+      @media (max-width: 900px) {
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .panel {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.04),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(8px);
+      }
+      .title {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+      .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      /* Phone preview */
+      .phone {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 26px;
+        padding: 14px;
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+        position: relative;
+        overflow: hidden;
+        min-height: 520px;
+      }
+      .notch {
+        width: 140px;
+        height: 26px;
+        border-radius: 0 0 16px 16px;
+        background: rgba(0, 0, 0, 0.35);
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: none;
+      }
+      .screen {
+        margin-top: 26px;
+        background: linear-gradient(180deg, var(--card), var(--card2));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 16px;
+        height: calc(520px - 14px * 2 - 26px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .screen-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+      .state {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .state .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .state .value {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(47, 125, 246, 0.14);
+        border: 1px solid rgba(47, 125, 246, 0.35);
+        color: #cfe0ff;
+      }
+      .content {
+        flex: 1;
+        border: 1px dashed rgba(255, 255, 255, 0.14);
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+      }
+      .content .big {
+        font-size: 30px;
+        font-weight: 800;
+      }
+      .content .hint {
+        color: var(--muted);
+        font-size: 13px;
+        max-width: 34ch;
+        line-height: 1.45;
+      }
+      .btnrow {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+      button {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 12px 10px;
+        border-radius: 14px;
+        font-weight: 650;
+        cursor: pointer;
+        transition:
+          transform 0.05s ease,
+          background 0.15s ease,
+          border-color 0.15s ease;
+        user-select: none;
+      }
+      button:hover {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .btn-left {
+        border-color: rgba(247, 201, 72, 0.35);
+        background: rgba(247, 201, 72, 0.1);
+      }
+      .btn-center {
+        border-color: rgba(37, 194, 160, 0.35);
+        background: rgba(37, 194, 160, 0.1);
+      }
+      .btn-right {
+        border-color: rgba(47, 125, 246, 0.4);
+        background: rgba(47, 125, 246, 0.12);
+      }
+
+      .map {
+        display: grid;
+        gap: 10px;
+      }
+      .map .card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 12px;
+      }
+      .map h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        letter-spacing: 0.2px;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 6px 10px;
+        font-size: 13px;
+        align-items: center;
+      }
+      .k {
+        color: var(--muted);
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+        font-size: 12px;
+      }
+      .v {
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .history {
+        max-height: 210px;
+        overflow: auto;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+        font-size: 12px;
+        color: #cfe0ff;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 10px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+      .tools {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .mini {
+        font-size: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .mini:hover {
+        color: var(--text);
+      }
+      .footer-note {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- Left: Phone preview -->
+      <div class="panel">
+        <div class="title">
+          <div>
+            <h1>หน้าเว็บ Preview: Flowchart Navigation</h1>
+            <div class="subtitle">
+              กดปุ่ม <b>Left / Center / Right</b> เพื่อเปลี่ยน state ตาม
+              flowchart (จำลองแบบวนซ้าย-ขวา)
+            </div>
+          </div>
+          <div class="badge" id="modeBadge">Mode: Preview</div>
+        </div>
+
+        <div class="phone" role="application" aria-label="Flow preview">
+          <div class="notch" aria-hidden="true"></div>
+          <div class="screen">
+            <div class="screen-header">
+              <div class="state">
+                <div class="label">Current State</div>
+                <div class="value" id="stateText">PAGE1</div>
+              </div>
+              <div class="pill" id="pillHint">Input: Left / Center / Right</div>
+            </div>
+
+            <div class="content" id="contentBox">
+              <div class="big" id="bigText">PAGE1</div>
+              <div class="hint" id="hintText">
+                จาก PAGE1: Left→PAGE3, Center→DIS "MENU WEIGHT", Right→PAGE2
+              </div>
+            </div>
+
+            <div class="btnrow" aria-label="Navigation buttons">
+              <button class="btn-left" id="btnLeft">← LEFT</button>
+              <button class="btn-center" id="btnCenter">● CENTER</button>
+              <button class="btn-right" id="btnRight">RIGHT →</button>
+            </div>
+
+            <div class="tools" aria-label="Tools">
+              <button class="mini" id="btnReset">Reset</button>
+              <button class="mini" id="btnBack" style="display: none">
+                Back to PAGE1
+              </button>
+              <button class="mini" id="btnToggleKeys">Enable Keyboard</button>
+            </div>
+
+            <div class="footer-note" id="keyNote">
+              คีย์บอร์ด: ปิดอยู่ (เปิดได้ด้วยปุ่ม Enable Keyboard) — แล้วใช้
+              A=Left, S=Center, D=Right
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Mapping + history -->
+      <div class="panel">
+        <div class="title">
+          <div>
+            <h1>Mapping ตาม Flowchart</h1>
+            <div class="subtitle">
+              แก้ mapping ในโค้ดได้ง่าย (ดู object <code>TRANSITIONS</code>)
+            </div>
+          </div>
+          <div class="badge" id="stateBadge">State: PAGE1</div>
+        </div>
+
+        <div class="map" id="mapBox"></div>
+
+        <div style="height: 10px"></div>
+
+        <h1 style="font-size: 14px; margin: 0 0 8px">History</h1>
+        <div class="history" id="historyBox"></div>
+      </div>
+    </div>
+
+    <script>
+      // === Flow mapping (ปรับได้) ===
+      // States: PAGE1, PAGE2, PAGE3, NONE, DIS_MENU_WEIGHT, DIS_TEST
+      const TRANSITIONS = {
+        PAGE1: { left: "PAGE3", center: "DIS_MENU_WEIGHT", right: "PAGE2" },
+        PAGE2: { left: "PAGE1", center: "DIS_TEST", right: "PAGE3" },
+        PAGE3: { left: "PAGE2", center: "NONE", right: "PAGE1" },
+
+        // Result states: disable L/C/R; allow Back button
+        NONE: {},
+        DIS_MENU_WEIGHT: {},
+        DIS_TEST: {},
+      };
+
+      const DESCRIPTIONS = {
+        PAGE1: 'จาก PAGE1: Left→PAGE3, Center→DIS "MENU WEIGHT", Right→PAGE2',
+        PAGE2: 'จาก PAGE2: Left→PAGE3, Center→DIS "TEST", Right→PAGE1',
+        PAGE3: "จาก PAGE3: Left→PAGE1, Center→NONE, Right→PAGE2",
+        NONE: "ผลลัพธ์: NONE (กด Back เพื่อกลับ PAGE1)",
+        DIS_MENU_WEIGHT: 'ผลลัพธ์: DIS "MENU WEIGHT" (กด Back เพื่อกลับ PAGE1)',
+        DIS_TEST: 'ผลลัพธ์: DIS "TEST" (กด Back เพื่อกลับ PAGE1)',
+      };
+
+      let current = "PAGE1";
+      let keyboardEnabled = false;
+
+      // UI refs
+      const stateText = document.getElementById("stateText");
+      const bigText = document.getElementById("bigText");
+      const hintText = document.getElementById("hintText");
+      const pillHint = document.getElementById("pillHint");
+      const stateBadge = document.getElementById("stateBadge");
+      const historyBox = document.getElementById("historyBox");
+      const mapBox = document.getElementById("mapBox");
+
+      const btnLeft = document.getElementById("btnLeft");
+      const btnCenter = document.getElementById("btnCenter");
+      const btnRight = document.getElementById("btnRight");
+      const btnReset = document.getElementById("btnReset");
+      const btnBack = document.getElementById("btnBack");
+      const btnToggleKeys = document.getElementById("btnToggleKeys");
+      const keyNote = document.getElementById("keyNote");
+
+      function log(line) {
+        const ts = new Date().toLocaleTimeString("th-TH", { hour12: false });
+        historyBox.textContent = `[${ts}] ${line}\n` + historyBox.textContent;
+      }
+
+      function isResultState(s) {
+        return s === "NONE" || s === "DIS_MENU_WEIGHT" || s === "DIS_TEST";
+      }
+
+      function renderMappingCards() {
+        const pages = ["PAGE1", "PAGE2", "PAGE3"];
+        mapBox.innerHTML = pages
+          .map((p) => {
+            const t = TRANSITIONS[p];
+            return `
+        <div class="card">
+          <h2>${p}</h2>
+          <div class="kv">
+            <div class="k">LEFT</div><div class="v">${t.left ?? "-"}</div>
+            <div class="k">CENTER</div><div class="v">${t.center ?? "-"}</div>
+            <div class="k">RIGHT</div><div class="v">${t.right ?? "-"}</div>
+          </div>
+        </div>
+      `;
+          })
+          .join("");
+      }
+
+      function updateUI() {
+        stateText.textContent = current;
+        bigText.textContent =
+          current === "DIS_MENU_WEIGHT"
+            ? 'DIS "MENU WEIGHT"'
+            : current === "DIS_TEST"
+              ? 'DIS "TEST"'
+              : current;
+
+        hintText.textContent = DESCRIPTIONS[current] || "";
+        stateBadge.textContent = `State: ${current}`;
+
+        const disabled = isResultState(current);
+        btnLeft.disabled = disabled;
+        btnCenter.disabled = disabled;
+        btnRight.disabled = disabled;
+
+        btnBack.style.display = disabled ? "inline-flex" : "none";
+        pillHint.textContent = disabled
+          ? "Result Screen"
+          : "Input: Left / Center / Right";
+      }
+
+      function go(dir) {
+        const next = TRANSITIONS[current]?.[dir];
+        if (!next) {
+          log(`${current} —(${dir.toUpperCase()})→ (no transition)`);
+          return;
+        }
+        const prev = current;
+        current = next;
+        log(`${prev} —(${dir.toUpperCase()})→ ${current}`);
+        updateUI();
+      }
+
+      // button handlers
+      btnLeft.addEventListener("click", () => go("left"));
+      btnCenter.addEventListener("click", () => go("center"));
+      btnRight.addEventListener("click", () => go("right"));
+
+      btnReset.addEventListener("click", () => {
+        current = "PAGE1";
+        historyBox.textContent = "";
+        log("Reset → PAGE1");
+        updateUI();
+      });
+
+      btnBack.addEventListener("click", () => {
+        const prev = current;
+        current = "PAGE1";
+        log(`${prev} —(BACK)→ PAGE1`);
+        updateUI();
+      });
+
+      btnToggleKeys.addEventListener("click", () => {
+        keyboardEnabled = !keyboardEnabled;
+        btnToggleKeys.textContent = keyboardEnabled
+          ? "Disable Keyboard"
+          : "Enable Keyboard";
+        keyNote.textContent = keyboardEnabled
+          ? "คีย์บอร์ด: เปิดอยู่ — ใช้ A=Left, S=Center, D=Right"
+          : "คีย์บอร์ด: ปิดอยู่ (เปิดได้ด้วยปุ่ม Enable Keyboard) — แล้วใช้ A=Left, S=Center, D=Right";
+        log(`Keyboard ${keyboardEnabled ? "enabled" : "disabled"}`);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (!keyboardEnabled) return;
+        const k = e.key.toLowerCase();
+        if (k === "a") go("left");
+        if (k === "s") go("center");
+        if (k === "d") go("right");
+      });
+
+      // init
+      renderMappingCards();
+      log("Start → PAGE1");
+      updateUI();
+    </script>
+  </body>
+</html>
